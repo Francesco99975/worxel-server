@@ -9,10 +9,6 @@ const businessSchema = new Schema({
         type: [Types.ObjectId],
         ref: "Department"
     },
-    managers: {
-        type: [Types.ObjectId],
-        ref: "Manager"
-    },
     employees: {
         type: [Types.ObjectId],
         ref: "Employee"

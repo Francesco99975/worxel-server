@@ -5,8 +5,8 @@ const employeeSchema = new Schema({
         type: String,
         required: true
     },
-    department: {
-        type: Types.ObjectId,
+    departments: {
+        type: [Types.ObjectId],
         ref: "Department"
     },
     color: String,
@@ -17,6 +17,10 @@ const employeeSchema = new Schema({
     shifts: [Object],
     flags: [Object],
     daysOff: [Object],
+    manager: {
+        type: Boolean,
+        required: true
+    },
     email: {
         type: String,
         required: true
