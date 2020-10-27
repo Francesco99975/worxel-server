@@ -1,4 +1,4 @@
-import express from "express";
+import express, { NextFunction } from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import bodyParser from "body-parser";
@@ -8,6 +8,7 @@ import authRoutes from "./routes/auth";
 import businessRoutes from "./routes/business";
 import departmentRoutes from "./routes/department";
 import employeeRoutes from "./routes/employee";
+import { HttpException } from "./interfaces/error";
 
 const app = express();
 
@@ -23,12 +24,12 @@ app.use('/auth', authRoutes);
 app.use('/businesses', businessRoutes);
 app.use('/departments', departmentRoutes);
 app.use('/employees', employeeRoutes);
-app.use((req: any, res: any, next: Function) => {
-    return res.status(404).json({message: "Content not found"});
+app.use((req, res, next) => {
+    return res.status(404).json({message: "Route not found"});
 });
-app.use((error: any, req: any, res: any, next: Function) => {
+app.use((error: HttpException, req: express.Request, res: express.Response, next: NextFunction) => {
     console.log(error);
-    return res.status(500).json({message: "An error occurred on the server"});
+    return res.status(error.code || 500).json({message: error.message || "An error occurred on the server"});
 });
 
 mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true})
