@@ -21,6 +21,6 @@ const businessSchema = new Schema({
         type: String,
         required: true
     }
-});
+}, {timestamps: true});
 
 export default model('Business', businessSchema);

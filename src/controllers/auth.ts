@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Business from "../models/business";
+import Department from "../models/department";
 import Employee from "../models/employee";
 import { AccountType, AccountCredentials, LoginAccountCredentials } from "../interfaces/auth";
 import { HttpException } from "../interfaces/error";
@@ -15,8 +16,11 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
             throw new HttpException(401 ,"This email was already used for another business");
         }
         const hashedpassword = await bcrypt.hash(password, 12);
-        const business = await new Business({name, email, password: hashedpassword}).save();
-        return res.status(201).json({message: "Business Account, successfully created!", business});
+        const newBusiness = await new Business({name, email, password: hashedpassword}).save();
+        const department = await new Department({name: "default", businessId: newBusiness._id}).save();
+        newBusiness.set('departments', [department._id]);
+        const business = await newBusiness.save();
+        return res.status(201).json({message: "Business Account, successfully created!", businessId: business._id.toString()});
     } catch (error) {
         return next(error);
     }
