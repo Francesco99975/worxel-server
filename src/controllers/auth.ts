@@ -40,7 +40,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
                 throw new HttpException(401, "Could not access this account! Wrong Password...");
             }
             const token = jwt.sign(
-                {email: business.get('email'), businessId: business._id.toString()}, 
+                {email: business.get('email'), id: business._id.toString()}, 
                 process.env.JWT_SECRET!, 
                 {expiresIn: '1h'}
             );
@@ -55,7 +55,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
                 throw new HttpException(401, "Could not access this account! Wrong Password...");
             }
             const token = jwt.sign(
-                {email: manager.get('email'), businessId: manager._id.toString()}, 
+                {email: manager.get('email'), id: manager._id.toString()}, 
                 process.env.JWT_SECRET!, 
                 {expiresIn: '1h'}
             );
@@ -70,7 +70,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
                 throw new HttpException(401, "Could not access this account! Wrong Password...");
             }
             const token = jwt.sign(
-                {email: employee.get('email'), businessId: employee._id.toString()}, 
+                {email: employee.get('email'), id: employee._id.toString()}, 
                 process.env.JWT_SECRET!, 
                 {expiresIn: '1h'}
             );

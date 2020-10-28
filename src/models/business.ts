@@ -5,14 +5,14 @@ const businessSchema = new Schema({
         type: String,
         required: true
     },
-    departments: {
-        type: [Types.ObjectId],
+    departments: [{
+        type: Types.ObjectId,
         ref: "Department"
-    },
-    employees: {
-        type: [Types.ObjectId],
+    }],
+    employees: [{
+        type: Types.ObjectId,
         ref: "Employee"
-    },
+    }],
     email: {
         type: String,
         required: true

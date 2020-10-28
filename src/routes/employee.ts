@@ -1,12 +1,16 @@
 import { Router } from "express";
+import { getEmployee, createEmployee, createShift, setFlags, updateEmployee, deleteEmployee } from "../controllers/employee";
+import isAuth from "../middlewares/isAuth";
+import isManager from "../middlewares/isManager";
 
 const router = Router();
 
 router
-.get('/')
-.get('/:id')
-.post('/add')
-.put('/update/:id')
-.delete('/delete/:id');
+.get('/:id', isAuth, getEmployee)
+.post('/add', isAuth, createEmployee)
+.post('/shift', isAuth, isManager, createShift)
+.post('flags', isAuth, setFlags)
+.put('/update/:id', isAuth, updateEmployee)
+.delete('/delete/:id', isAuth, deleteEmployee);
 
 export default router;

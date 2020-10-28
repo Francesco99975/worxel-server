@@ -5,10 +5,10 @@ const employeeSchema = new Schema({
         type: String,
         required: true
     },
-    departments: {
-        type: [Types.ObjectId],
+    departments: [{
+        type: Types.ObjectId,
         ref: "Department"
-    },
+    }],
     color: String,
     priority: {
         type: Number,
@@ -28,6 +28,10 @@ const employeeSchema = new Schema({
     password: {
         type: String,
         required: true
+    },
+    businessId: {
+        type: Types.ObjectId,
+        ref: 'Business'
     }
 }, {timestamps: true});
 

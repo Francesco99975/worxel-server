@@ -5,7 +5,9 @@ import { HttpException } from "../interfaces/error";
 const getBusiness = async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
     try {
-        const business = await Business.findById(id).populate('Department').populate('Employee');
+        const business = await Business.findById(id)
+            .populate('employees', {name: 1, departments: 1, color: 1, priority: 1, manager: 1, email: 1})
+            .populate('departments', {name: 1});
         if(!business) {
             throw new HttpException(404, "Business not found!");
         }

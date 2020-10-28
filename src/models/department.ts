@@ -7,7 +7,7 @@ const departmentSchema = new Schema({
     },
     businessId: {
         type: Types.ObjectId,
-        required: true
+        ref: 'Business'
     }
 }, {timestamps: true});
 
