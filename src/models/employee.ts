@@ -1,7 +1,11 @@
 import { Schema, model, Types } from "mongoose";
 
 const employeeSchema = new Schema({
-    name: {
+    firstname: {
+        type: String,
+        required: true
+    },
+    lastname: {
         type: String,
         required: true
     },

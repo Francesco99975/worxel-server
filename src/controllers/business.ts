@@ -33,7 +33,7 @@ const updateBusiness = async (req: Request, res: Response, next: NextFunction) =
         business.set('name', name);
         business.set('email', email);
         await business.save();
-        return res.status(201).json({message: "Business Updated!"});
+        return res.status(200).json({message: "Business Updated!"});
     } catch (error) {
         return next(error);
     }

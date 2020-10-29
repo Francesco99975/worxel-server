@@ -5,9 +5,9 @@ import Employee from "../models/employee";
 export default async (req: Request, res: Response, next: NextFunction) => {
     const { id } = res.locals.user;
     try {
-        const existingManager = await Employee.findOne({_id: id, manager: true});
-        if(!existingManager) {
-            throw new HttpException(401, "Unauthorized Access to Manager Functions!");
+        const existingEmp = await Employee.findById(id);
+        if(!existingEmp) {
+            throw new HttpException(401, "Unauthorized Access to Employee!");
         }
         return next();
     } catch (error) {

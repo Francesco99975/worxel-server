@@ -58,7 +58,7 @@ const updateDepartment = async (req: Request, res: Response, next: NextFunction)
         }
         department.set('name', name);
         await department.save();
-        return res.status(201).json({message: "Department Updated"});
+        return res.status(200).json({message: "Department Updated"});
     } catch (error) {
         return next(error);
     }
