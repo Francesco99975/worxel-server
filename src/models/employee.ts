@@ -19,9 +19,9 @@ const employeeSchema = new Schema({
         type: Number,
         required: true
     },
-    shifts: [Shift],
-    flags: [Flag],
-    daysOff: [Flag],
+    shifts: [Object],
+    flags: [Object],
+    daysOff: [Object],
     manager: {
         type: Boolean,
         required: true
