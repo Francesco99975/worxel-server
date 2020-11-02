@@ -1,11 +1,20 @@
+import crypto from "crypto";
 import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import nodemailer from "nodemailer";
+import nodemailerSendgrid from "nodemailer-sendgrid";
 import Business from "../models/business";
 import Department from "../models/department";
 import Employee from "../models/employee";
-import { AccountType, AccountCredentials, LoginAccountCredentials } from "../interfaces/auth";
+import { AccountType, AccountCredentials, LoginAccountCredentials, ResetCredentials } from "../interfaces/auth";
 import { HttpException } from "../interfaces/error";
+
+const transport = nodemailer.createTransport(
+    nodemailerSendgrid({
+        apiKey: process.env.SENDGRID_API_KEY!
+    })
+);
 
 const signUp = async (req: Request, res: Response, next: NextFunction) => {
     const {email, password, name} = req.body as AccountCredentials;
@@ -83,4 +92,88 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-export {signUp, login};
+const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
+    const { email, accountType } = req.body as {email: string, accountType: number};
+    let user;
+    try {
+        crypto.randomBytes(32, async (err, buffer) => {
+            if(err) throw new HttpException(500, "Crypto failed for an unknown reason!");
+
+            const token = buffer.toString("hex");
+
+            switch(accountType) {
+                case 0:
+                    user = await Business.findOne({email});
+                    break;
+                case 1:
+                    user = await Employee.findOne({email, manager: true});
+                    break;
+                case 2:
+                    user = await Employee.findOne({email, manager: false});
+                    break;
+                default:
+                    throw new HttpException(401, "Invalid Account Type");
+            }
+
+            if(!user) {
+                throw new HttpException(404, "User not found");
+            }
+
+            user.set('resetToken', token);
+            user.set('resetTokenExpiration', Date.now() + 3600000);
+            await user.save();
+            res.status(200).json({message: "Reset Request Sent"});
+            return transport.sendMail({
+                to: user.get('email'),
+                from: "francescobarranca@outlook.com",
+                subject: "Password Reset",
+                html: `<p>You requested a password reset</p>
+                        <p>Click this <a href="http://localhost:5000/reset/${token}">link</a> to set a new password.</p>`,
+              });
+        });
+    } catch (error) {
+        return next(error);
+    }
+};
+
+const confirmReset = async (req: Request, res: Response, next: NextFunction) => {
+    const { password, password2, passwordToken, id, accountType } = req.body as ResetCredentials;
+
+    let user;
+
+    switch(accountType) {
+        case 0:
+            user = await Business.findById(id);
+            break;
+        case 1 || 2:
+            user = await Employee.findById(id)
+            break;
+        default:
+            throw new HttpException(401, "Invalid Account Type");
+    }
+
+    if(!user) {
+        throw new HttpException(404, "User not found");
+    }
+
+    if (password !== password2) {
+        throw new HttpException(422, "Passwords don't match");
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    user.set('password', hashedPassword);
+    user.set('resetToken', undefined);
+    user.set('resetTokenExpiration', undefined);
+    await user.save();
+
+    res.status(201).json({message: "password updated!"});
+    return transport.sendMail({
+        to: user.get('email'),
+        from: "francescobarranca@outlook.com",
+        subject: "Password Reset Success",
+        html: `<h1>Your password was resetted successfully!</h1>`,
+    });
+};
+
+export {signUp, login, resetPassword, confirmReset};

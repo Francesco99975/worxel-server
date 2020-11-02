@@ -37,7 +37,9 @@ const employeeSchema = new Schema({
     businessId: {
         type: Types.ObjectId,
         ref: 'Business'
-    }
+    },
+    resetToken: String,
+    resetTokenExpiration: Date
 }, {timestamps: true});
 
 export default model('Employee', employeeSchema);

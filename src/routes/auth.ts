@@ -1,10 +1,12 @@
 import { Router } from "express";
-import { signUp, login } from "../controllers/auth";
+import { signUp, login, resetPassword, confirmReset } from "../controllers/auth";
 
 const router = Router();
 
 router
 .post('/signup', signUp)
-.post('/login', login);
+.post('/login', login)
+.post('/reset', resetPassword)
+.post('/confirm', confirmReset);
 
 export default router;

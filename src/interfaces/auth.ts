@@ -16,4 +16,12 @@ interface LoginAccountCredentials {
     password: string
 }
 
-export {AccountType, AccountCredentials, LoginAccountCredentials};
+interface ResetCredentials {
+    password: string,
+    password2: string,
+    passwordToken: string,
+    id: string,
+    accountType: number
+}
+
+export {AccountType, AccountCredentials, LoginAccountCredentials, ResetCredentials};
