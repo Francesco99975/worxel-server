@@ -1,4 +1,5 @@
 import { Schema, model, Types } from "mongoose";
+import { Shift, Flag } from "../interfaces/employee";
 
 const employeeSchema = new Schema({
     firstname: {
@@ -18,9 +19,9 @@ const employeeSchema = new Schema({
         type: Number,
         required: true
     },
-    shifts: [Object],
-    flags: [Object],
-    daysOff: [Object],
+    shifts: [Shift],
+    flags: [Flag],
+    daysOff: [Flag],
     manager: {
         type: Boolean,
         required: true

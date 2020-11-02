@@ -1,10 +1,25 @@
 import { Request, Response, NextFunction } from "express";
 import { Types } from "mongoose";
 import bcrypt from "bcryptjs";
-import { EmployeeForm } from "../interfaces/employee";
+import { EmployeeForm, Shift, Flag } from "../interfaces/employee";
 import { HttpException } from "../interfaces/error";
 import Employee from "../models/employee";
 import Business from "../models/business";
+
+// Used by Manager or Business
+const getEmployees = async (req: Request, res: Response, next: NextFunction) => {
+    const { deptId } = req.params;
+    const { businessId } = req.body;
+    try {
+        const employees = await Employee.find({businessId: businessId, departments: {'$in': [deptId]}});
+        if(!employees) {
+            throw new HttpException(404, "Could not find any employee with this id");
+        }
+        return res.status(200).json({employees});
+    } catch (error) {
+        return next(error);
+    }
+};
 
 const getEmployee = async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
@@ -20,6 +35,7 @@ const getEmployee = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
+// Only available to Business
 const createEmployee = async (req: Request, res: Response, next: NextFunction) => {
     const businessId = res.locals.user.id;
     const { firstname, lastname, departments, color, priority, manager, email, password } = req.body as EmployeeForm;
@@ -40,12 +56,45 @@ const createEmployee = async (req: Request, res: Response, next: NextFunction) =
     }
 };
 
-const createShift = async (req: Request, res: Response, next: NextFunction) => {};
+// Used by Manager or Business
+const createShift = async (req: Request, res: Response, next: NextFunction) => {
+    const { empId, businessId, start, end } = req.body as { empId: string, businessId: string, start: Date, end: Date };
+    try {
+        const employee = await Employee.findOne({_id: empId, businessId: businessId});
+        if(!employee) {
+            throw new HttpException(404, "Could not find any employee with this id");
+        }
+        const shifts = employee.get('shifts') as Array<Shift>;
+        shifts.push(new Shift(start, end));
+        employee.set('shifts', shifts);
+        await employee.save();
+        // TODO: emit shift event
+        return res.status(201).json({message: "Shift created"});
+    } catch (error) {
+        return next(error);
+    }
+};
 
-const setFlags = async (req: Request, res: Response, next: NextFunction) => {};
+// Only available to Employee
+const setFlags = async (req: Request, res: Response, next: NextFunction) => {
+    const { empId, businessId, from, to, flagType } = req.body as { empId: string, businessId: string, from: Date, to: Date, flagType: number };
+    try {
+        const employee = await Employee.findOne({_id: empId, businessId: businessId});
+        if(!employee) {
+            throw new HttpException(404, "Could not find any employee with this id");
+        }
+        const flags = employee.get('flags') as Array<Flag>;
+        flags.push(new Flag(from, to, flagType));
+        employee.set('flags', flags);
+        await employee.save();
+        // TODO: emit flag event
+        return res.status(201).json({message: "Flag created"});
+    } catch (error) {
+        return next(error);
+    }
+};
 
-const setDaysOff = async (req: Request, res: Response, next: NextFunction) => {};
-
+// Only available to Business
 const updateEmployee = async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
     const businessId = res.locals.user.id;
@@ -67,6 +116,7 @@ const updateEmployee = async (req: Request, res: Response, next: NextFunction) =
     }
 };
 
+// Only available to Business
 const deleteEmployee = async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
     const businessId = res.locals.user.id;
@@ -83,4 +133,4 @@ const deleteEmployee = async (req: Request, res: Response, next: NextFunction) =
     }
 };
 
-export { getEmployee, createEmployee, createShift, setFlags, setDaysOff, updateEmployee, deleteEmployee };
+export { getEmployees, getEmployee, createEmployee, createShift, setFlags, updateEmployee, deleteEmployee };
