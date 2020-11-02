@@ -143,10 +143,18 @@ const confirmReset = async (req: Request, res: Response, next: NextFunction) => 
 
     switch(accountType) {
         case 0:
-            user = await Business.findById(id);
+            user = await Business.findOne({
+                _id: id,
+                resetToken: passwordToken,
+                resetTokenExpiration: { $gt: Date.now() },
+            });
             break;
         case 1 || 2:
-            user = await Employee.findById(id)
+            user = await Employee.findOne({
+                _id: id,
+                resetToken: passwordToken,
+                resetTokenExpiration: { $gt: Date.now() },
+            });
             break;
         default:
             throw new HttpException(401, "Invalid Account Type");
